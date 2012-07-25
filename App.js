@@ -1,6 +1,3 @@
-var lumenize = require('./lumenize');
-//var lumenize = Rally.data.lookback.Lumenize;
-
 Ext.define('CustomApp', {
     extend: 'Rally.app.App',
     componentCls: 'app',
@@ -13,7 +10,7 @@ Ext.define('CustomApp', {
             xtype: 'panel',
             itemId: 'chartHolder',
             layout: 'fit',
-            height: 400,
+            height: 350,
             margin: '0 0 200 0'
         }
     ],

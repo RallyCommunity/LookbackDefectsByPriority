@@ -1,8 +1,9 @@
 (function() {
     var Ext = window.Ext4 || window.Ext;
 
-	var lumenize = require('./lumenize');
+    //TODO pull in lumenize this way
 	//var lumenize = Rally.data.lookback.Lumenize;
+    var lumenize = require('./lumenize');
 
     // TODO make this configurable
     var openStates = ["Submitted", "Open"];
@@ -16,22 +17,22 @@
             // temporary override needed since new URL format not deployed yet
             this.proxy.url = Rally.environment.getServer().getLookbackUrl(1.37) + '/' +
                     Rally.util.Ref.getOidFromRef(this.context.workspace) + '/artifact/snapshot/query';
-        },
+        }
     });
     
 	Ext.define('Rally.ui.chart.DefectsByPriorityChart', {
         extend: 'Rally.ui.chart.Chart',
-    	alias: 'widget.rallydefectsbyprioritychart',
+        alias: 'widget.rallydefectsbyprioritychart',
 
-    	config: {
-    		defectsByPriorityConfig: {
+        config: {
+            defectsByPriorityConfig: {
                 startDate: null,
                 endDate: null
-    		},
+            },
 
             storeType: 'Rally.data.lookback.SnapshotStoreOldUrl',
 
-        	/**
+            /**
              * @cfg {Object} chartConfig The HighCharts chart config defining all remaining chart options.
              * Full documentation here: [http://www.highcharts.com/ref/](http://www.highcharts.com/ref/)
              */
@@ -42,6 +43,9 @@
                 },
                 legend: {
                     enabled: false
+                },
+                title: {
+                    text: "Defects By Priority"
                 },
                 xAxis: {
                     categories: [],
@@ -54,14 +58,14 @@
                 },
                 tooltip: {
                     formatter: function() {
-                        return '' + this.x + '<br />' + this.series.name + ': ' + this.y;
+                        return ' '+ this.x + ': ' + this.y;
                     }
                 },
                 plotOptions : {
-			  		column: {
-				  		color: '#F00'                              
-			  		},
-		  		},
+                    column: {
+                        color: '#F00'                              
+                    }
+                },
                 series: []
             },
 
@@ -128,7 +132,7 @@
         },
 
         getDefectAllowedValues: function(){
-            var queryUrl = "https://rally1.rallydev.com/slm/webservice/1.36/typedefinition.js"
+            var queryUrl = "https://rally1.rallydev.com/slm/webservice/1.36/typedefinition.js";
             
             var params = {
                 query: '( Name = "Defect" )',
@@ -153,12 +157,11 @@
 
         extractAllowedValues: function(defectTypeDef){
             var stateAttDef = Ext.Array.filter(defectTypeDef.Attributes, function(attribute){
-                return attribute.Name == "Priority";
+                return attribute.Name === "Priority";
             }, null)[0];
 
             this.allowedValues = Ext.Array.pluck(stateAttDef.AllowedValues, "StringValue");
 
-            console.log("allowed values loaded: "+ this.allowedValues);
             if(this.allowdValues && this.storeLoaded){
                 this.onStoreLoad(this.store);
             }
@@ -171,9 +174,7 @@
          */
         onStoreLoad: function(store) {
             this.storeLoaded = true;
-            console.log("store loaded ");
             if(this.allowedValues){
-                console.log("calling parent onStoreLoad()");
                 this.callParent([store]);
             }
 
@@ -193,22 +194,21 @@
         calculatePrioritiesData: function(results){
             var uniques = this.getUniqueSnapshots(results);
 
-        	var groupBySpec = {
-	        	groupBy: 'Priority',
-	        	aggregations: [
-	        		{
-	        			field: 'ObjectID',
-	        			f: '$count'
-	        		}
-	        	]
+            var groupBySpec = {
+                groupBy: 'Priority',
+                aggregations: [
+                    {
+                        field: 'ObjectID',
+                        f: '$count'
+                    }
+                ]
 
 	        };
         
-        	var groups = lumenize.groupBy(uniques, groupBySpec);
-        	var series = this.convertGroupingsToSeries(groups);
-        	//var categories = this.getCategories(groups);
+            var groups = lumenize.groupBy(uniques, groupBySpec);
+            var series = this.convertGroupingsToSeries(groups);
 
-    		return {
+            return {
                 series: series,
                 categories: this.allowedValues
             };
@@ -223,53 +223,41 @@
             var lastResult = null;
             var l = results.length;
             for(var i=0; i < l; ++i){
-                result = results[i];
+                var result = results[i];
                 var oid = result.ObjectID;
-                if(lastResult != null && oid != lastResult.ObjectID){
+                if(lastResult !== null && oid !== lastResult.ObjectID){
                     uniques.push(lastResult);
                 }
                 lastResult = result;
             }
             // make sure we get the last one
-            if(lastResult != null){
+            if(lastResult !== null){
                 uniques.push(lastResult);
             }
 
             return uniques;
         },
-
-        /*
-        getCategories: function(groups){
-	        var categories = [];
-	        for(var group in groups){
-	            if( groups.hasOwnProperty(group) ){
-	                categories.push(group);
-	            }
-	        }
-	        return categories;
-	    },
-        */
     
 	    convertGroupingsToSeries: function(groups){
 
-	    	var data = [];
-	    	
+            var data = [];
+            
             var l = this.allowedValues.length;
-	    	for(var i=0; i < l; ++i){
-	    		var allowedValue = this.allowedValues[i];
+            for(var i=0; i < l; ++i){
+                var allowedValue = this.allowedValues[i];
                 if(groups[allowedValue]){
-	    			data.push( groups[allowedValue]['ObjectID_$count'] );
-	    		}
+                    data.push( groups[allowedValue].ObjectID_$count );
+                }
                 else{
                     data.push(0);
                 }
-	    	}
-	    	
-	    	return {
-	    		type : 'column',
-	    		data: data,
-	    		name: 'Priority Counts'
-	    	};
+            }
+            
+            return {
+                type : 'column',
+                data: data,
+                name: 'Count'
+            };
 	    }
 	});
-})();
+}());

@@ -3,6 +3,7 @@
     "className": "CustomApp",
     "sdk": "2.0p3",
     "javascript": [
+    	"DefectsByPriorityChart.js"
         "App.js"
     ],
     "css": [
