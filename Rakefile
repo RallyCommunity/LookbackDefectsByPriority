@@ -1,13 +1,13 @@
 require 'fileutils'
 
 
-DISABLE_JSLINT = ENV['DISABLE_JSLINT'] == 'true'
+ENABLE_JSLINT = ENV['ENABLE_JSLINT'] == 'false'
 
 task :default => [:debug, :build]
 
 desc "Create an app with the provided name (and optional SDK version)"
 task :new, :app_name, :sdk_version do |t, args|
-  args.with_defaults(:sdk_version => "2.0p3")
+  args.with_defaults(:sdk_version => "2.0p2")
   Dir.chdir(Rake.original_dir)
 
   config = Rally::AppSdk::AppConfig.new(args.app_name, args.sdk_version)
@@ -32,9 +32,9 @@ task :clean do
   remove_files Rally::AppSdk::AppTemplateBuilder.get_auto_generated_files
 end
 
-desc "Run jslint on all JavaScript files used by this app, can be disabled by setting DISABLE_JSLINT=true."
+desc "Run jslint on all JavaScript files used by this app, can be enabled by setting ENABLE_JSLINT=true."
 task :jslint do |t|
-  unless DISABLE_JSLINT
+  if ENABLE_JSLINT
     Dir.chdir(Rake.original_dir)
 
     config = get_config_from_file
@@ -144,7 +144,7 @@ module Rally
 
         resources.each do |file|
           if debug
-            block << separator << debug_tpl.gsub("VALUE", file)
+            block << separator << debug_tpl.gsub("VALUE"){file}
             if is_javascript_file(file)
               separator = ",\n" + indent * 4
             else
@@ -156,7 +156,7 @@ module Rally
             end
           end
         end
-        template.gsub(placeholder, block)
+        template.gsub(placeholder){block}
       end
 
       def replace_placeholder_variables(str, opts = {})
@@ -192,8 +192,8 @@ module Rally
     class AppConfig
       SDK_RELATIVE_URL = "/apps"
       SDK_ABSOLUTE_URL = "https://rally1.rallydev.com/apps"
-      SDK_FILE = "sdk.js?wsapiVersion=1.33"
-      SDK_DEBUG_FILE = "sdk-debug.js?wsapiVersion=1.33"
+      SDK_FILE = "sdk.js"
+      SDK_DEBUG_FILE = "sdk-debug.js"
 
       attr_reader :name, :sdk_version
       attr_accessor :javascript, :css, :class_name
@@ -381,8 +381,8 @@ JAVASCRIPT_BLOCK
 <head>
     <title>APP_TITLE</title>
 
-    <script type="text/javascript" src="APP_SDK_PATH"></script>
     <script type="text/javascript" src="https://raw.github.com/lmaccherone/Lumenize/master/deploy/lumenize.js"></script>
+    <script type="text/javascript" src="APP_SDK_PATH"></script>
 
     <script type="text/javascript">
         Rally.onReady(function() {
@@ -410,7 +410,6 @@ STYLE_BLOCK
 
     <script type="text/javascript" src="APP_SDK_PATH"></script>
     <script type="text/javascript" src="https://raw.github.com/lmaccherone/Lumenize/master/deploy/lumenize.js"></script>
-
     <script type="text/javascript">
         Rally.onReady(function() {
 #{JAVASCRIPT_INLINE_BLOCK_TPL}        });
