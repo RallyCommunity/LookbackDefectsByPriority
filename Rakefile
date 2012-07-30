@@ -1,13 +1,13 @@
 require 'fileutils'
 
 
-ENABLE_JSLINT = ENV['ENABLE_JSLINT'] == 'false'
+ENABLE_JSLINT = ENV['ENABLE_JSLINT'] == 'true'
 
 task :default => [:debug, :build]
 
 desc "Create an app with the provided name (and optional SDK version)"
 task :new, :app_name, :sdk_version do |t, args|
-  args.with_defaults(:sdk_version => "2.0p2")
+  args.with_defaults(:sdk_version => "2.0p3")
   Dir.chdir(Rake.original_dir)
 
   config = Rally::AppSdk::AppConfig.new(args.app_name, args.sdk_version)
@@ -463,3 +463,4 @@ end
 def sanitize_string(value)
   value.gsub(/[^a-zA-Z0-9 \-_\.']/, "")
 end
+
