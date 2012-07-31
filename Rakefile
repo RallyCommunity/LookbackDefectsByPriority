@@ -381,7 +381,6 @@ JAVASCRIPT_BLOCK
 <head>
     <title>APP_TITLE</title>
 
-    <script type="text/javascript" src="https://raw.github.com/lmaccherone/Lumenize/master/deploy/lumenize.js"></script>
     <script type="text/javascript" src="APP_SDK_PATH"></script>
 
     <script type="text/javascript">
@@ -409,7 +408,6 @@ STYLE_BLOCK
     <title>APP_TITLE</title>
 
     <script type="text/javascript" src="APP_SDK_PATH"></script>
-    <script type="text/javascript" src="https://raw.github.com/lmaccherone/Lumenize/master/deploy/lumenize.js"></script>
     <script type="text/javascript">
         Rally.onReady(function() {
 #{JAVASCRIPT_INLINE_BLOCK_TPL}        });
